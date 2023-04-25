@@ -6,6 +6,8 @@ import time as timer
 total = 0
 b = True
 a = True
+global skeeped
+skeeped = 0
 gametime = "0"
 start = timer.time()
 clock = time.Clock()
@@ -40,13 +42,15 @@ class spriten(sprite.Sprite):
         if keys[K_DOWN] and hero.rect.y < 450:
                 hero.rect.y += 3
     def updater(self):
+        global skeeped
         cur_time = timer.time()
         self.rect.x += self.speedx
         self.rect.y += self.speedy
         if self.rect.y >= 450:
             self.rect.y = 20
+            skeeped += 1
 
-        if self.rect.x + 65 >= 700:
+        if self.rect.x + self.sizex >= 700:
             if self.start_x <= 200:
                 self.rect.x = self.start_x
                 self.rect.y = self.start_y
@@ -156,15 +160,20 @@ while b:
         gametime = str(gametime)
         end = font.render(" вы продержались:"+gametime,True,(250,0,0))
         tot = font.render(" счет:"+str(total),True,(250,250,0))
+        skpd = font.render("пропущено:" +str(skeeped),True,(250,75,0))
         window.blit(end,(0,100))
+        window.blit(skpd,(275,200))
         window.blit(tot,(500,100))
         if keys[K_LALT] and keys[K_LCTRL]:
             total = 0
             gametime = 0
+            skeeped = 0
             a = True 
             start = timer.time()
             for sprit in spr:
                 sprit.start()
+            for bul in bulets:
+                bul.kill()
     for e in event.get():
         if e.type == QUIT:
             b = False
