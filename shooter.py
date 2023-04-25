@@ -4,6 +4,7 @@ from random import *
 from pygame import *
 import time as timer
 total = 0
+speedtime = timer.time()
 b = True
 a = True
 global skeeped
@@ -68,8 +69,8 @@ class spriten(sprite.Sprite):
             self.speedx = randint(-3,3)
             self.speedy = randint(0,3)
     def updat(self):
-        self.rect.x += self.speedx2
-        self.rect.y += self.speedy2
+        self.rect.x += self.speedx
+        self.rect.y += self.speedy
         if self.rect.y >= 450:
             self.rect.y = 20
 
@@ -88,6 +89,9 @@ class spriten(sprite.Sprite):
     def fire(self):
         bullet = spriten("bullet.png",20,30,hero.rect.x + 20,hero.rect.y +2,0,4)
         bulets.add(bullet)
+    def nl(self):
+        self.speedx += 10
+        self.speedy += 10
     def start(self):
         self.rect.x = self.start_x
         self.rect.y = self.start_y
@@ -154,6 +158,10 @@ while b:
             meteor2.start() 
             total+=1 
         finish = timer.time()
+        if speedtime - finish >= 5:
+            meteor1.nl()
+            meteor2.nl()
+            speedtime = 0
         gametime = finish - start
     else:            
         gametime = int(gametime)
