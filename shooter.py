@@ -3,11 +3,14 @@ environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 from random import *
 from pygame import *
 import time as timer
+global skeeped
+global finish
+global speedtime
 total = 0
 speedtime = timer.time()
+finish = timer.time()
 b = True
 a = True
-global skeeped
 skeeped = 0
 gametime = "0"
 start = timer.time()
@@ -29,6 +32,8 @@ class spriten(sprite.Sprite):
         self.speedy2 = pspy
         self.speedx = pspx
         self.speedy = pspy
+        self.startsx = pspx
+        self.startsy = pspy
         self.rects = [self.rect.x,self.rect.y]
     def reset(self):
         window.blit(self.image,(self.rect.x, self.rect.y))
@@ -69,6 +74,14 @@ class spriten(sprite.Sprite):
             self.speedx = randint(-3,3)
             self.speedy = randint(0,3)
     def updat(self):
+        global speedtime
+        global finish
+        if finish -speedtime >= 1:
+            self.speedx += 1.3
+            self.speedy += 1.3
+            meteor2.speedx += 1.3
+            meteor2.speedy += 1.3
+            speedtime = timer.time()
         self.rect.x += self.speedx
         self.rect.y += self.speedy
         if self.rect.y >= 450:
@@ -95,6 +108,8 @@ class spriten(sprite.Sprite):
     def start(self):
         self.rect.x = self.start_x
         self.rect.y = self.start_y
+        self.speedx = self.startsx
+        self.speedy = self.startsy
 
 font.init()
 font = font.SysFont("Roman",40)          
@@ -158,10 +173,6 @@ while b:
             meteor2.start() 
             total+=1 
         finish = timer.time()
-        if speedtime - finish >= 5:
-            meteor1.nl()
-            meteor2.nl()
-            speedtime = 0
         gametime = finish - start
     else:            
         gametime = int(gametime)
