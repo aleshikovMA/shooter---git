@@ -6,6 +6,7 @@ import time as timer
 global skeeped
 global finish
 global speedtime
+global total 
 total = 0
 speedtime = timer.time()
 finish = timer.time()
@@ -17,8 +18,10 @@ start = timer.time()
 clock = time.Clock()
 window = display.set_mode((700,500))
 class spriten(sprite.Sprite):
-    def __init__ (self, img, sx, sy, px, py, pspx, pspy):
+    def __init__ (self, img, sx, sy, px, py, pspx, pspy, hp, damage):
         super().__init__()
+        self.hp = hp
+        self.damage = damage 
         self.sizex = sx
         self.sizey = sy
         self.image = transform.scale(image.load(img),(self.sizex,self.sizey))
@@ -76,12 +79,6 @@ class spriten(sprite.Sprite):
     def updat(self):
         global speedtime
         global finish
-        if finish -speedtime >= 1:
-            self.speedx += 1.3
-            self.speedy += 1.3
-            meteor2.speedx += 1.3
-            meteor2.speedy += 1.3
-            speedtime = timer.time()
         self.rect.x += self.speedx
         self.rect.y += self.speedy
         if self.rect.y >= 450:
@@ -100,7 +97,7 @@ class spriten(sprite.Sprite):
     def update(self):
         self.rect.y -= self.speedy
     def fire(self):
-        bullet = spriten("bullet.png",20,30,hero.rect.x + 20,hero.rect.y +2,0,4)
+        bullet = spriten("bullet.png",20,30,hero.rect.x + 20,hero.rect.y +2,0,4,1,100)
         bulets.add(bullet)
     def nl(self):
         self.speedx += 10
@@ -110,19 +107,26 @@ class spriten(sprite.Sprite):
         self.rect.y = self.start_y
         self.speedx = self.startsx
         self.speedy = self.startsy
+    def dmg(self):
+        global total
+        self.hp -= hero.damage
+        if self.hp <= 0:
+            self.start()
+            total +=1 
 
 font.init()
 font = font.SysFont("Roman",40)          
 bg = transform.scale(image.load("galaxy.jpg"),(700,500))
-hero = spriten("rocket.png",60,60,295,400,6,4)
-enemy = spriten("ufo.png",40,40,10,5,4,0)
-enemy2 = spriten("ufo.png",40,40,140,5,4,0)
-enemy3 = spriten("ufo.png",40,40,270,5,4,0)
-enemy4 = spriten("ufo.png",40,40,400,5,4,0)
-meteor1 = spriten("asteroid.png",70,70,10,10,5,4)
-meteor2 = spriten("asteroid.png",70,70,620,10,-5,4)
-spr = [hero, enemy,enemy2, enemy3,enemy4,meteor1, meteor2]
+hero = spriten("rocket.png",60,60,295,400,6,4,1,100)
+enemy = spriten("ufo.png",40,40,10,5,4,0,100,100)
+enemy2 = spriten("ufo.png",40,40,140,5,4,0,100,100)
+enemy3 = spriten("ufo.png",40,40,270,5,4,0,100,100)
+enemy4 = spriten("ufo.png",40,40,400,5,4,0,100,100)
+meteor1 = spriten("asteroid.png",70,70,10,10,5,4,200,100)
+meteor2 = spriten("asteroid.png",70,70,620,10,-5,4,200,100)
 bulets = sprite.Group()
+spr = [hero, enemy,enemy2, enemy3,enemy4,meteor1, meteor2]
+spr1 = [enemy,enemy2, enemy3,enemy4,meteor1, meteor2]
 while b:
     keys = key.get_pressed()
     window.blit(bg,(0,0))
@@ -143,46 +147,37 @@ while b:
         meteor2.updat()
         hero.update2()
         bulets.update()
-        if sprite.collide_rect(hero,enemy):
-            a = False
-        if sprite.collide_rect(hero,enemy2):
-            a = False
-        if sprite.collide_rect(hero,enemy3):
-            a = False
-        if sprite.collide_rect(hero,enemy4):
-            a = False
-        if sprite.collide_rect(hero,meteor1):
-            a = False
-        if sprite.collide_rect(hero,meteor2):
-            a = False
-        if sprite.spritecollide(enemy,bulets,True):
-            enemy.start()
-            total += 1
-        if sprite.spritecollide(enemy2,bulets,True):
-            enemy2.start()
-        if sprite.spritecollide(enemy3,bulets,True):
-            enemy3.start()
-            total+=1
-        if sprite.spritecollide(enemy4,bulets,True):
-            enemy4.start()
-            total+=1
-        if sprite.spritecollide(meteor1,bulets,True):
-            meteor1.start()
-            total+=1
-        if sprite.spritecollide(meteor2,bulets,True):
-            meteor2.start() 
-            total+=1 
+        if finish -speedtime >= 1:
+            meteor1.speedx += 1.3
+            meteor1.speedy += 1.3
+            meteor2.speedy += 1.3
+            meteor2.speedx += 1.3
+            speedtime = timer.time()
+        for s in spr1:
+            if sprite.collide_rect(hero,s):
+                a = False
+        for s in spr1:
+            
+            if sprite.spritecollide(s,bulets,True):
+                s.dmg()
+                for bul in bulets:
+                    bul.kill()
+                
+
+                
         finish = timer.time()
         gametime = finish - start
     else:            
         gametime = int(gametime)
-        gametime = str(gametime)
-        end = font.render(" вы продержались:"+gametime,True,(250,0,0))
-        tot = font.render(" счет:"+str(total),True,(250,250,0))
-        skpd = font.render("пропущено:" +str(skeeped),True,(250,75,0))
+        gametime = str(gametime) 
+        end = font.render(" Вы продержались:"+gametime,True,(250,0,0))
+        tot = font.render(" Счет:"+str(total),True,(250,250,0))
+        skpd = font.render("Пропущено:" +str(skeeped),True,(250,75,0))
+        lvl = font.render("Уровень:" +str(int(gametime)//5 +1),True,(150,0,150))
         window.blit(end,(0,100))
-        window.blit(skpd,(275,200))
+        window.blit(skpd,(10,200))
         window.blit(tot,(500,100))
+        window.blit(lvl,(475,200))
         if keys[K_LALT] and keys[K_LCTRL]:
             total = 0
             gametime = 0
@@ -199,6 +194,8 @@ while b:
         elif e.type == KEYDOWN:
             if e.key == K_SPACE:
                 hero.fire()
+
+    
 
     clock.tick(60)
     display.update()
